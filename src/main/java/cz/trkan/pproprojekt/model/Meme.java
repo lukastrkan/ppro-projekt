@@ -17,7 +17,7 @@ public class Meme {
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "author_id")
     private User author;
 
@@ -27,10 +27,10 @@ public class Meme {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private List<Tag> tags;
 
-    @OneToMany(mappedBy = "meme")
+    @OneToMany(mappedBy = "meme", cascade = CascadeType.REMOVE)
     private List<Comment> comments;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private Category category;
 
     public long getId() {

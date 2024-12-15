@@ -11,10 +11,10 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private  long id;
     private String text;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "author_id")
     private User author;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "meme_id")
     private Meme meme;
 
