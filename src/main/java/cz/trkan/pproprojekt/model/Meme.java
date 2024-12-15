@@ -14,6 +14,7 @@ public class Meme {
     private String name;
     private String filename;
     private String path;
+    @Temporal(TemporalType.TIMESTAMP)
     private Date created;
 
     @ManyToOne
@@ -25,6 +26,9 @@ public class Meme {
     @JoinTable(name = "meme_tag", joinColumns = @JoinColumn(name = "meme_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private List<Tag> tags;
+
+    @OneToMany(mappedBy = "meme")
+    private List<Comment> comments;
 
     @ManyToOne
     private Category category;
@@ -83,5 +87,21 @@ public class Meme {
 
     public void setTags(List<Tag> tags) {
         this.tags = tags;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 }

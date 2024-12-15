@@ -2,6 +2,8 @@ package cz.trkan.pproprojekt.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -11,6 +13,13 @@ public class User {
     private String username;
     private String password;
     private String role;
+    private String email;
+
+    @OneToMany(mappedBy = "author")
+    private List<Comment> comments;
+
+    @OneToMany(mappedBy = "author")
+    private List<Meme> memes;
 
     public Long getId() {
         return id;
@@ -42,5 +51,29 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public List<Meme> getMemes() {
+        return memes;
+    }
+
+    public void setMemes(List<Meme> memes) {
+        this.memes = memes;
     }
 }

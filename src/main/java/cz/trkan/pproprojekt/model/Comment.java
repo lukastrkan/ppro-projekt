@@ -2,6 +2,8 @@ package cz.trkan.pproprojekt.model;
 
 import jakarta.persistence.*;
 
+import java.util.Date;
+
 @Entity
 @Table(name = "comments")
 public class Comment {
@@ -12,9 +14,12 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "author_id")
     private User author;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "meme_id")
     private Meme meme;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created;
 
     public long getId() {
         return id;
@@ -46,5 +51,13 @@ public class Comment {
 
     public void setMeme(Meme meme) {
         this.meme = meme;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 }
