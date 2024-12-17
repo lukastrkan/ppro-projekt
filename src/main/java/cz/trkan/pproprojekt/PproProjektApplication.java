@@ -32,6 +32,7 @@ public class PproProjektApplication {
         return (args) -> {
             addUser("admin@memes.local", "admin", "heslo", "ADMIN");
             addUser("user@memes.local", "user", "heslo", "USER");
+            addUser("user2@memes.local", "user2", "heslo", "USER");
         };
     }
 
