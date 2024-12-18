@@ -1,6 +1,6 @@
 package cz.trkan.pproprojekt.security;
 
-import cz.trkan.pproprojekt.service.UserService;
+import cz.trkan.pproprojekt.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,18 +18,18 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final UserService userService;
+    private final IUserService IUserService;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public SecurityConfig(UserService userService, PasswordEncoder passwordEncoder) {
-        this.userService = userService;
+    public SecurityConfig(IUserService IUserService, PasswordEncoder passwordEncoder) {
+        this.IUserService = IUserService;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userService).passwordEncoder(passwordEncoder);
+        auth.userDetailsService(IUserService).passwordEncoder(passwordEncoder);
     }
 
     @Bean
@@ -41,8 +41,8 @@ public class SecurityConfig {
                         //.requestMatchers("/403").permitAll()
                         .anyRequest().permitAll()
                 )
-                .formLogin(Customizer.withDefaults())
-                /*.formLogin((form) -> form
+                //.formLogin(Customizer.withDefaults())
+                .formLogin((form) -> form
                         .loginPage("/login") // Custom login page
                         .loginProcessingUrl("/login") // Form submission URL
                         .defaultSuccessUrl("/", true)
@@ -51,7 +51,7 @@ public class SecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
-                )*/
+                )
                 .exceptionHandling((exceptions) -> exceptions
                         .accessDeniedHandler(accessDeniedHandler()));
 
