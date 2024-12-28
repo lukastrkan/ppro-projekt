@@ -1,22 +1,25 @@
 @param String error
 @param String logout
+@param org.springframework.security.web.csrf.CsrfToken csrfToken
 
 @template.layout(content = @`
         <h1 class="text-center">Login</h1>
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <form>
+                <form method="post">
+                    <!-- CSRF Token -->
+                    <input type="hidden" name="${csrfToken.getParameterName()}" value="${csrfToken.getToken()}">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" placeholder="Enter your username">
+                        <input type="text" class="form-control" name="username" id="username" placeholder="Enter your username">
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" placeholder="Enter your password">
+                        <input type="password" class="form-control" name="password" id="password" placeholder="Enter your password">
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Login</button>
                     <div class="text-center mt-3">
-                        <a href="#">Register</a>
+                        <a href="/register">Register</a>
                     </div>
                 </form>
             </div>

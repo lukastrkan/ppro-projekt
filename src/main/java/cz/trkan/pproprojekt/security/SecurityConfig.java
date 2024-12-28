@@ -35,10 +35,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf((csrf) -> {
+                    //csrf.disable();
+                })
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/h2-console/**").permitAll()
-                        //.requestMatchers("/403").permitAll()
+                        .requestMatchers("/login", "/register").not().authenticated()
+                        .requestMatchers("/403").permitAll()// Disallow access to login and register for logged-in users
                         .anyRequest().permitAll()
                 )
                 //.formLogin(Customizer.withDefaults())
