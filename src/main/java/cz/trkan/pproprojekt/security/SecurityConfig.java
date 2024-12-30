@@ -39,7 +39,11 @@ public class SecurityConfig {
                     csrf.disable();
                 })
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/tags").permitAll()
+                        .requestMatchers("/tags/**").hasAnyRole("ADMIN", "EDITOR")
+                        .requestMatchers("/categories").permitAll()
+                        .requestMatchers("/categories/**").hasAnyRole("ADMIN", "EDITOR")
+
                         .requestMatchers("/login", "/register").not().authenticated()
                         .requestMatchers("/403").permitAll()
                         .anyRequest().permitAll()

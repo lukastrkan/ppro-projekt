@@ -11,4 +11,12 @@ public class JteUtils {
         }
         return null;
     }
+
+    public static boolean isEditor(){
+        var user = getCurrentUser();
+        if (user != null) {
+            return user.getRole().equals("EDITOR") || user.getRole().equals("ADMIN");
+        }
+        return false;
+    }
 }
