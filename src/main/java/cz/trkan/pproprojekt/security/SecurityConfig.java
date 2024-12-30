@@ -36,15 +36,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf((csrf) -> {
-                    //csrf.disable();
+                    csrf.disable();
                 })
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/login", "/register").not().authenticated()
-                        .requestMatchers("/403").permitAll()// Disallow access to login and register for logged-in users
+                        .requestMatchers("/403").permitAll()
                         .anyRequest().permitAll()
                 )
-                //.formLogin(Customizer.withDefaults())
                 .formLogin((form) -> form
                         .loginPage("/login") // Custom login page
                         .loginProcessingUrl("/login") // Form submission URL

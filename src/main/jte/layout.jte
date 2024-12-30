@@ -1,4 +1,6 @@
 @param gg.jte.Content content
+@param cz.trkan.pproprojekt.security.MyUserDetails user = cz.trkan.pproprojekt.utils.JteUtils.getCurrentUser()
+@param org.springframework.validation.BindingResult bindingResult = null
 
 <!DOCTYPE html>
 <html lang="en">
@@ -13,39 +15,40 @@
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
-        <a class="navbar-brand" href="#">BrandName</a>
+        <a class="navbar-brand" href="/">Memes</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    <a class="nav-link active" aria-current="page" href="/upload">Upload</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Features</a>
+                    <a class="nav-link" href="/tags">Tags</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Pricing</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Contact</a>
+                    <a class="nav-link" href="/categories">Categories</a>
                 </li>
             </ul>
             <ul class="navbar-nav">
-                <!-- Login/Account Button -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Account
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="accountDropdown">
-                        <li><a class="dropdown-item" href="#">Login</a></li>
-                        <li><a class="dropdown-item" href="#">Register</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Profile</a></li>
-                        <li><a class="dropdown-item" href="#">Logout</a></li>
-                    </ul>
-                </li>
+                @if (user == null)
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Register</a>
+                    </li>
+                @else
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <form method="post" action="/logout">
+                            <button type="submit" class="nav-link btn btn-link">Logout</button>
+                        </form>
+                    </li>
+                @endif
             </ul>
         </div>
     </div>
@@ -53,6 +56,15 @@
 
 <!-- Main Content Area -->
 <div class="container my-5 flex-grow-1">
+    @if(bindingResult != null && bindingResult.hasErrors())
+        <div class="alert alert-danger" role="alert">
+            <ul class="mb-0">
+                @for(org.springframework.validation.FieldError error : bindingResult.getFieldErrors())
+                    <li>${error.getDefaultMessage()}</li>
+                @endfor
+            </ul>
+        </div>
+    @endif
     ${content}
 </div>
 

@@ -8,11 +8,16 @@ public class MemeController {
     @GetMapping("/")
     protected String home()
     {
-        return "";
+        return "index";
     }
 
     @GetMapping("/403")
     protected String unauthorized(){
         return "unauthorized";
+    }
+
+    @GetMapping("/upload")
+    protected String upload(){
+        return "upload";
     }
 }
