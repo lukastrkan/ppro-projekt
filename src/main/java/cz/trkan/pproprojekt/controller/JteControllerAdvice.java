@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class JteControllerAdvice {
     @ModelAttribute
     public void addUser(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        var x = SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof MyUserDetails;
         if (userDetails instanceof MyUserDetails) {
             model.addAttribute("user", userDetails);
         }
