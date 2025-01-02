@@ -1,5 +1,6 @@
 @param cz.trkan.pproprojekt.model.Tag tag
 @param org.springframework.validation.BindingResult bindingResult = null
+@param String title = null
 
 @template.layout(content = @`
     <div class="row justify-content-center">
@@ -15,4 +16,4 @@
             </form>
         </div>
     </div>
-`, bindingResult = bindingResult)
+`, bindingResult = bindingResult, title = title)

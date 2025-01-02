@@ -37,7 +37,11 @@ content = @`
                             @if(JteUtils.isEditor())
                                 <td>${tag.getId()}</td>
                             @endif
-                            <td>${tag.getName()}</td>
+                            <td>
+                                <a href="/tag/${tag.getId()}">
+                                    ${tag.getName()}
+                                </a>
+                            </td>
                             @if(JteUtils.isEditor())
                                 <td>
                                     <a href="/tags/edit/${tag.getId()}" class="btn btn-sm btn-outline-primary">Edit</a>
@@ -52,5 +56,4 @@ content = @`
             </div>
         @endif
     </div>
-`
-)
+`, title = "Tags")

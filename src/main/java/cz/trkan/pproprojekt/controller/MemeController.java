@@ -44,6 +44,28 @@ public class MemeController {
         return "meme/list";
     }
 
+    @GetMapping("/tag/{tagId}")
+    protected String byTag(@PathVariable Long tagId, Model model) {
+        var tag = tagRepository.findById(tagId).orElse(null);
+        if (tag == null) {
+            return "redirect:/";
+        }
+        model.addAttribute("memes", memeRepository.findMemesByTags(List.of(tag)));
+        model.addAttribute("tag", tag);
+        return "meme/list";
+    }
+
+    @GetMapping("/category/{categoryId}")
+    protected String byCategory(@PathVariable Long categoryId, Model model) {
+        var category = categoryRepository.findById(categoryId).orElse(null);
+        if (category == null) {
+            return "redirect:/";
+        }
+        model.addAttribute("memes", memeRepository.findMemesByCategory(category));
+        model.addAttribute("category", category);
+        return "meme/list";
+    }
+
     @GetMapping("/403")
     protected String unauthorized() {
         return "unauthorized";

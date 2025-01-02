@@ -1,13 +1,23 @@
 @param java.util.List<cz.trkan.pproprojekt.model.Meme> memes
 @param org.springframework.validation.BindingResult bindingResult = null
+@param cz.trkan.pproprojekt.model.Category category = null
+@param cz.trkan.pproprojekt.model.Tag tag = null
+
 
 @template.layout(
 content = @`
     <div class="container">
         <div class="row mb-4">
             <div class="col">
-                <h2>Memes</h2>
-                <a href="/upload" class="btn btn-primary mb-3">Upload New Meme</a>
+                <h2>
+                    Memes
+                    @if(category != null)
+                        in category <span class="badge bg-secondary">${category.getName()}</span>
+                    @elseif(tag != null)
+                        with tag <span class="badge bg-secondary">${tag.getName()}</span>
+                    @endif
+
+                </h2>
             </div>
         </div>
 

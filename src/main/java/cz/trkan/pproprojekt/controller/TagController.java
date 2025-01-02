@@ -29,6 +29,7 @@ public class TagController {
     @GetMapping("/create")
     public String createTagForm(Model model) {
         model.addAttribute("tag", new Tag());
+        model.addAttribute("title", "Create Tag");
         return "tag/form";
     }
 
@@ -55,6 +56,7 @@ public class TagController {
         Tag tag = tagRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid tag Id:" + id));
         model.addAttribute("tag", tag);
+        model.addAttribute("title", "Edit Tag");
         return "tag/form";
     }
 

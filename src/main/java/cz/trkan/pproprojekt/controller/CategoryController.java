@@ -27,6 +27,7 @@ public class CategoryController {
     @GetMapping("/create")
     public String createCategoryForm(Model model) {
         model.addAttribute("category", new Category());
+        model.addAttribute("title", "Create Category");
         return "category/form";
     }
 
@@ -53,6 +54,7 @@ public class CategoryController {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid category Id:" + id));
         model.addAttribute("category", category);
+        model.addAttribute("title", "Edit Category");
         return "category/form";
     }
 

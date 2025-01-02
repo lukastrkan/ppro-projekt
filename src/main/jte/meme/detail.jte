@@ -28,14 +28,18 @@ content = @`
                 <!-- Category -->
                 <div class="mb-3">
                     <h5>Category</h5>
-                    <span class="badge bg-primary">${meme.getCategory().getName()}</span>
+                    <a href="/category/${meme.getCategory().getId()}" style="text-decoration: none;">
+                        <span class="badge bg-primary">${meme.getCategory().getName()}</span>
+                    </a>
                 </div>
 
                 <!-- Tags -->
                 <div class="mb-3">
                     <h5>Tags</h5>
                     @for(Tag tag : meme.getTags())
-                        <span class="badge bg-secondary">${tag.getName()}</span>
+                        <a href="/tag/${tag.getId()}" style="text-decoration: none;">
+                            <span class="badge bg-secondary">${tag.getName()}</span>
+                        </a>
                     @endfor
                 </div>
 

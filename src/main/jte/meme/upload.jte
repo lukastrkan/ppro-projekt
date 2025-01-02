@@ -52,4 +52,4 @@ content = @`
             });
         });
     </script>
-`, bindingResult = bindingResult)
+`, bindingResult = bindingResult, title = "Upload Meme")
