@@ -4,6 +4,7 @@
 
 @param Meme meme
 @param org.springframework.validation.BindingResult bindingResult = null
+@param boolean canEdit = false
 
 @template.layout(
 content = @`
@@ -22,7 +23,16 @@ content = @`
             </div>
             <div class="col-md-4">
                 <!-- Meme Details -->
-                <h2>${meme.getName()}</h2>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2>${meme.getName()}</h2>
+                    @if(canEdit)
+                        <div>
+                            <a href="/meme/${meme.getId()}/edit" class="btn btn-sm btn-outline-primary me-2">Edit</a>
+                            <a href="/meme/${meme.getId()}/delete" class="btn btn-sm btn-outline-danger"
+                            onclick="return confirm('Are you sure you want to delete this meme?')">Delete</a>
+                        </div>
+                    @endif
+                </div>
                 <p class="text-muted">Posted on ${meme.getCreated().toString()}</p>
 
                 <!-- Category -->
@@ -76,7 +86,7 @@ content = @`
             </div>
         </div>
     </div>
-`
-)
+`,
+title = meme.getName())
 
 

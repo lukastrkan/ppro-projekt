@@ -52,7 +52,7 @@
                     </li>
                 @else
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Profile</a>
+                        <span class="nav-link">Welcome, ${user.getUsername()}</span>
                     </li>
                     <li class="nav-item">
                         <form method="post" action="/logout">

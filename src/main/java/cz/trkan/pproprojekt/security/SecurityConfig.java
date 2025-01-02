@@ -39,14 +39,14 @@ public class SecurityConfig {
                     csrf.disable();
                 })
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/tags").permitAll()
+                        .requestMatchers("/tags").authenticated()
                         .requestMatchers("/tags/**").hasAnyRole("ADMIN", "EDITOR")
-                        .requestMatchers("/categories").permitAll()
+                        .requestMatchers("/categories").authenticated()
                         .requestMatchers("/categories/**").hasAnyRole("ADMIN", "EDITOR")
 
                         .requestMatchers("/login", "/register").not().authenticated()
                         .requestMatchers("/403").permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
                         .loginPage("/login") // Custom login page

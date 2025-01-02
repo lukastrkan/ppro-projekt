@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import static cz.trkan.pproprojekt.utils.JteUtils.isEditor;
+
 @Controller
 public class MemeController {
     private final CategoryRepository categoryRepository;
@@ -29,13 +31,15 @@ public class MemeController {
     private final MemeRepository memeRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+    private final FileUploadUtil fileUploadUtil;
 
-    public MemeController(CategoryRepository categoryRepository, TagRepository tagRepository, MemeRepository memeRepository, UserRepository userRepository, CommentRepository commentRepository) {
+    public MemeController(CategoryRepository categoryRepository, TagRepository tagRepository, MemeRepository memeRepository, UserRepository userRepository, CommentRepository commentRepository, FileUploadUtil fileUploadUtil) {
         this.categoryRepository = categoryRepository;
         this.tagRepository = tagRepository;
         this.memeRepository = memeRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
+        this.fileUploadUtil = fileUploadUtil;
     }
 
     @GetMapping("/")
@@ -133,10 +137,14 @@ public class MemeController {
     }
 
     @GetMapping("/meme/{id}")
-    private String meme(@PathVariable Long id, Model model) {
+    private String meme(@PathVariable Long id, Model model, @AuthenticationPrincipal MyUserDetails userDetails) {
         Meme meme = memeRepository.findById(id).orElse(null);
         if (meme == null) {
             return "redirect:/";
+        }
+
+        if (userDetails != null && (userDetails.getUsername().equals(meme.getAuthor().getUsername()) || isEditor())) {
+            model.addAttribute("canEdit", true);
         }
 
         model.addAttribute("meme", meme);
@@ -164,5 +172,62 @@ public class MemeController {
         commentRepository.save(comment);
 
         return "redirect:/meme/" + id;
+    }
+
+    @GetMapping("/meme/{id}/edit")
+    private String editMeme(@PathVariable Long id, Model model, @AuthenticationPrincipal MyUserDetails userDetails) {
+        Meme meme = memeRepository.findById(id).orElse(null);
+        if (meme == null) {
+            return "redirect:/";
+        }
+
+        if (userDetails == null || (!meme.getAuthor().getUsername().equals(userDetails.getUsername()) && !isEditor())) {
+            return "redirect:/meme/" + id;
+        }
+
+        model.addAttribute("meme", meme);
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("tags", tagRepository.findAll());
+        return "meme/edit";
+    }
+
+    @PostMapping("/meme/{id}/edit")
+    private String editMeme(@PathVariable Long id, @RequestParam("name") String name, @RequestParam("category") Long categoryId, @RequestParam("tags") List<Long> tagIds, Model model, @AuthenticationPrincipal MyUserDetails userDetails) {
+        Meme meme = memeRepository.findById(id).orElse(null);
+        if (meme == null) {
+            return "redirect:/";
+        }
+
+        if (userDetails == null || (!meme.getAuthor().getUsername().equals(userDetails.getUsername()) && !isEditor())) {
+            return "redirect:/meme/" + id;
+        }
+
+        meme.setName(name);
+        meme.setCategory(categoryRepository.findById(categoryId).orElse(null));
+        List<Tag> tagList = tagRepository.findAllById(tagIds);
+        meme.setTags(tagList);
+
+        memeRepository.save(meme);
+
+        return "redirect:/meme/" + id;
+    }
+
+    @GetMapping("/meme/{id}/delete")
+    private String deleteMeme(@PathVariable Long id, @AuthenticationPrincipal MyUserDetails userDetails) {
+        Meme meme = memeRepository.findById(id).orElse(null);
+        if (meme == null) {
+            return "redirect:/";
+        }
+
+        if (userDetails == null || (!meme.getAuthor().getUsername().equals(userDetails.getUsername()) && !isEditor())) {
+            return "redirect:/meme/" + id;
+        }
+
+        var path = meme.getPath();
+        meme = null;
+        memeRepository.deleteById(id);
+        fileUploadUtil.deleteFile(path);
+
+        return "redirect:/";
     }
 }
