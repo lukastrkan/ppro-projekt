@@ -83,7 +83,7 @@ public class MemeController {
     }
 
     @PostMapping("/upload")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("name") String name, @RequestParam("category") Long categoryId, @RequestParam("tags") List<Long> tagIds, Model model, FileUploadUtil fileUploadUtil, BindingResult bindingResult, @AuthenticationPrincipal UserDetails userDetails) {
+    public String handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("name") String name, @RequestParam("category") Long categoryId, @RequestParam(value = "tags", required = false) List<Long> tagIds, Model model, FileUploadUtil fileUploadUtil, BindingResult bindingResult, @AuthenticationPrincipal UserDetails userDetails) {
         if (file.isEmpty()) {
             //model.addAttribute("errorMessage", "Please select a file to upload");
             bindingResult.rejectValue("file", "file", "Please select a file to upload");
@@ -124,8 +124,10 @@ public class MemeController {
                 }
             }
 
-            List<Tag> tagList = tagRepository.findAllById(tagIds);
-            meme.setTags(tagList);
+            if (tagIds != null) {
+                List<Tag> tagList = tagRepository.findAllById(tagIds);
+                meme.setTags(tagList);
+            }
 
             memeRepository.save(meme);
 
