@@ -44,7 +44,7 @@ public class MemeController {
 
     @GetMapping("/")
     protected String home(Model model) {
-        model.addAttribute("memes", memeRepository.findAll());
+        model.addAttribute("memes", memeRepository.findAll().reversed());
         return "meme/list";
     }
 
