@@ -3,8 +3,8 @@ package cz.trkan.pproprojekt.controller;
 import cz.trkan.pproprojekt.model.Comment;
 import cz.trkan.pproprojekt.model.Meme;
 import cz.trkan.pproprojekt.model.Tag;
-import cz.trkan.pproprojekt.repository.*;
 import cz.trkan.pproprojekt.security.MyUserDetails;
+import cz.trkan.pproprojekt.service.*;
 import cz.trkan.pproprojekt.utils.FileUploadUtil;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,46 +26,46 @@ import static cz.trkan.pproprojekt.utils.JteUtils.isEditor;
 
 @Controller
 public class MemeController {
-    private final CategoryRepository categoryRepository;
-    private final TagRepository tagRepository;
-    private final MemeRepository memeRepository;
-    private final UserRepository userRepository;
-    private final CommentRepository commentRepository;
+    private final ICategoryService categoryService;
+    private final ITagService tagService;
+    private final IMemeService memeService;
+    private final IUserService userService;
+    private final ICommentService commentService;
     private final FileUploadUtil fileUploadUtil;
 
-    public MemeController(CategoryRepository categoryRepository, TagRepository tagRepository, MemeRepository memeRepository, UserRepository userRepository, CommentRepository commentRepository, FileUploadUtil fileUploadUtil) {
-        this.categoryRepository = categoryRepository;
-        this.tagRepository = tagRepository;
-        this.memeRepository = memeRepository;
-        this.userRepository = userRepository;
-        this.commentRepository = commentRepository;
+    public MemeController(ICategoryService categoryService, ITagService tagService, IMemeService memeService, IUserService userService, ICommentService commentService, FileUploadUtil fileUploadUtil) {
+        this.categoryService = categoryService;
+        this.tagService = tagService;
+        this.memeService = memeService;
+        this.userService = userService;
+        this.commentService = commentService;
         this.fileUploadUtil = fileUploadUtil;
     }
 
     @GetMapping("/")
     protected String home(Model model) {
-        model.addAttribute("memes", memeRepository.findAll().reversed());
+        model.addAttribute("memes", memeService.findAll().reversed());
         return "meme/list";
     }
 
     @GetMapping("/tag/{tagId}")
     protected String byTag(@PathVariable Long tagId, Model model) {
-        var tag = tagRepository.findById(tagId).orElse(null);
+        var tag = tagService.findById(tagId);
         if (tag == null) {
             return "redirect:/";
         }
-        model.addAttribute("memes", memeRepository.findMemesByTags(List.of(tag)));
+        model.addAttribute("memes", memeService.findMemesByTags(List.of(tag)));
         model.addAttribute("tag", tag);
         return "meme/list";
     }
 
     @GetMapping("/category/{categoryId}")
     protected String byCategory(@PathVariable Long categoryId, Model model) {
-        var category = categoryRepository.findById(categoryId).orElse(null);
+        var category = categoryService.findById(categoryId);
         if (category == null) {
             return "redirect:/";
         }
-        model.addAttribute("memes", memeRepository.findMemesByCategory(category));
+        model.addAttribute("memes", memeService.findMemesByCategory(category));
         model.addAttribute("category", category);
         return "meme/list";
     }
@@ -77,8 +77,8 @@ public class MemeController {
 
     @GetMapping("/upload")
     protected String upload(Model model) {
-        model.addAttribute("categories", categoryRepository.findAll());
-        model.addAttribute("tags", tagRepository.findAll());
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("tags", tagService.findAll());
         return "meme/upload";
     }
 
@@ -87,7 +87,7 @@ public class MemeController {
         if (file.isEmpty()) {
             //model.addAttribute("errorMessage", "Please select a file to upload");
             bindingResult.rejectValue("file", "file", "Please select a file to upload");
-            model.addAttribute("categories", categoryRepository.findAll());
+            model.addAttribute("categories", categoryService.findAll());
             return "meme/upload";
         }
 
@@ -95,7 +95,7 @@ public class MemeController {
         String contentType = file.getContentType();
         if (contentType == null || (!contentType.startsWith("image/") && !contentType.startsWith("video/"))) {
             bindingResult.rejectValue("file", "file", "Only image and video files are allowed");
-            model.addAttribute("categories", categoryRepository.findAll());
+            model.addAttribute("categories", categoryService.findAll());
             return "meme/upload";
         }
 
@@ -116,20 +116,20 @@ public class MemeController {
             meme.setFilename(filename);
             meme.setPath(uploadDir + filename);
             meme.setCreated(new Date());
-            meme.setCategory(categoryRepository.findById(categoryId).orElse(null));
+            meme.setCategory(categoryService.findById(categoryId));
             if (userDetails != null) {
-                var user = userRepository.findByUsername(userDetails.getUsername());
+                var user = userService.findByUsername(userDetails.getUsername());
                 if (user != null) {
                     meme.setAuthor(user);
                 }
             }
 
             if (tagIds != null) {
-                List<Tag> tagList = tagRepository.findAllById(tagIds);
+                List<Tag> tagList = tagService.findAllById(tagIds);
                 meme.setTags(tagList);
             }
 
-            memeRepository.save(meme);
+            memeService.save(meme);
 
             return "redirect:/meme/" + meme.getId();
         } catch (IOException e) {
@@ -140,7 +140,7 @@ public class MemeController {
 
     @GetMapping("/meme/{id}")
     private String meme(@PathVariable Long id, Model model, @AuthenticationPrincipal MyUserDetails userDetails) {
-        Meme meme = memeRepository.findById(id).orElse(null);
+        Meme meme = memeService.findById(id);
         if (meme == null) {
             return "redirect:/";
         }
@@ -157,28 +157,30 @@ public class MemeController {
     public String addComment(@PathVariable Long id,
                              @RequestParam String text,
                              @AuthenticationPrincipal MyUserDetails userDetails) {
-        Meme meme = memeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid meme Id:" + id));
+        Meme meme = memeService.findById(id);
+        if (meme == null) {
+            return "redirect:/";
+        }
 
         Comment comment = new Comment();
         comment.setText(text);
         comment.setMeme(meme);
         if (userDetails != null) {
-            var user = userRepository.findByUsername(userDetails.getUsername());
+            var user = userService.findByUsername(userDetails.getUsername());
             if (user != null) {
                 comment.setAuthor(user);
             }
         }
         comment.setCreated(new Date());
 
-        commentRepository.save(comment);
+        commentService.save(comment);
 
         return "redirect:/meme/" + id;
     }
 
     @GetMapping("/meme/{id}/edit")
     private String editMeme(@PathVariable Long id, Model model, @AuthenticationPrincipal MyUserDetails userDetails) {
-        Meme meme = memeRepository.findById(id).orElse(null);
+        Meme meme = memeService.findById(id);
         if (meme == null) {
             return "redirect:/";
         }
@@ -188,14 +190,14 @@ public class MemeController {
         }
 
         model.addAttribute("meme", meme);
-        model.addAttribute("categories", categoryRepository.findAll());
-        model.addAttribute("tags", tagRepository.findAll());
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("tags", tagService.findAll());
         return "meme/edit";
     }
 
     @PostMapping("/meme/{id}/edit")
     private String editMeme(@PathVariable Long id, @RequestParam("name") String name, @RequestParam("category") Long categoryId, @RequestParam("tags") List<Long> tagIds, Model model, @AuthenticationPrincipal MyUserDetails userDetails) {
-        Meme meme = memeRepository.findById(id).orElse(null);
+        Meme meme = memeService.findById(id);
         if (meme == null) {
             return "redirect:/";
         }
@@ -205,18 +207,18 @@ public class MemeController {
         }
 
         meme.setName(name);
-        meme.setCategory(categoryRepository.findById(categoryId).orElse(null));
-        List<Tag> tagList = tagRepository.findAllById(tagIds);
+        meme.setCategory(categoryService.findById(categoryId));
+        List<Tag> tagList = tagService.findAllById(tagIds);
         meme.setTags(tagList);
 
-        memeRepository.save(meme);
+        memeService.save(meme);
 
         return "redirect:/meme/" + id;
     }
 
     @GetMapping("/meme/{id}/delete")
     private String deleteMeme(@PathVariable Long id, @AuthenticationPrincipal MyUserDetails userDetails) {
-        Meme meme = memeRepository.findById(id).orElse(null);
+        Meme meme = memeService.findById(id);
         if (meme == null) {
             return "redirect:/";
         }
@@ -227,7 +229,7 @@ public class MemeController {
 
         var path = meme.getPath();
         meme = null;
-        memeRepository.deleteById(id);
+        memeService.deleteById(id);
         fileUploadUtil.deleteFile(path);
 
         return "redirect:/";

@@ -2,9 +2,8 @@ package cz.trkan.pproprojekt.controller;
 
 import cz.trkan.pproprojekt.model.Tag;
 import cz.trkan.pproprojekt.repository.TagRepository;
+import cz.trkan.pproprojekt.service.ITagService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,15 +13,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/tags")
 public class TagController {
 
-    private final TagRepository tagRepository;
+    private final ITagService tagService;
 
-    public TagController(TagRepository tagRepository) {
-        this.tagRepository = tagRepository;
+    public TagController(ITagService tagService) {
+        this.tagService = tagService;
     }
 
     @GetMapping
     public String listTags(Model model) {
-        model.addAttribute("tags", tagRepository.findAll());
+        model.addAttribute("tags", tagService.findAll());
         return "tag/list";
     }
 
@@ -41,20 +40,22 @@ public class TagController {
         }
 
         //validate unique constraint manually
-        if (tagRepository.findByName(tag.getName()) != null) {
+        if (tagService.findByName(tag.getName()) != null) {
             bindingResult.rejectValue("name", "duplicate", "Name already exists");
             model.addAttribute("bindingResult", bindingResult);
             return "tag/form";
         }
 
-        tagRepository.save(tag);
+        tagService.save(tag);
         return "redirect:/tags";
     }
 
     @GetMapping("/edit/{id}")
     public String editTagForm(@PathVariable Long id, Model model) {
-        Tag tag = tagRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid tag Id:" + id));
+        Tag tag = tagService.findById(id);
+        if (tag == null) {
+            throw new IllegalArgumentException("Invalid tag Id:" + id);
+        }
         model.addAttribute("tag", tag);
         model.addAttribute("title", "Edit Tag");
         return "tag/form";
@@ -63,15 +64,17 @@ public class TagController {
     @PostMapping("/edit/{id}")
     public String editTag(@PathVariable Long id, @ModelAttribute Tag tag) {
         tag.setId(id);
-        tagRepository.save(tag);
+        tagService.save(tag);
         return "redirect:/tags";
     }
 
     @GetMapping("/delete/{id}")
     public String deleteTag(@PathVariable Long id) {
-        Tag tag = tagRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid tag Id:" + id));
-        tagRepository.delete(tag);
+        Tag tag = tagService.findById(id);
+        if (tag == null) {
+            throw new IllegalArgumentException("Invalid tag Id:" + id);
+        }
+        tagService.delete(tag);
         return "redirect:/tags";
     }
 }

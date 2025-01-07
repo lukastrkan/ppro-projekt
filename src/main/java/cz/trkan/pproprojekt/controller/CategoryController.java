@@ -2,6 +2,7 @@ package cz.trkan.pproprojekt.controller;
 
 import cz.trkan.pproprojekt.model.Category;
 import cz.trkan.pproprojekt.repository.CategoryRepository;
+import cz.trkan.pproprojekt.service.ICategoryService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,15 +13,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/categories")
 public class CategoryController {
 
-    private final CategoryRepository categoryRepository;
+    private final ICategoryService categoryService;
 
-    public CategoryController(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
+    public CategoryController(ICategoryService categoryService) {
+        this.categoryService = categoryService;
     }
 
     @GetMapping
     public String listCategories(Model model) {
-        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("categories", categoryService.findAll());
         return "category/list";
     }
 
@@ -39,20 +40,22 @@ public class CategoryController {
         }
 
         //validate unique constraint manually
-        if (categoryRepository.findByName(category.getName()) != null) {
+        if (categoryService.findByName(category.getName()) != null) {
             bindingResult.rejectValue("name", "duplicate", "Name already exists");
             model.addAttribute("bindingResult", bindingResult);
             return "category/form";
         }
 
-        categoryRepository.save(category);
+        categoryService.save(category);
         return "redirect:/categories";
     }
 
     @GetMapping("/edit/{id}")
     public String editCategoryForm(@PathVariable Long id, Model model) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid category Id:" + id));
+        Category category = categoryService.findById(id);
+        if (category == null) {
+            throw new IllegalArgumentException("Invalid category Id:" + id);
+        }
         model.addAttribute("category", category);
         model.addAttribute("title", "Edit Category");
         return "category/form";
@@ -61,15 +64,17 @@ public class CategoryController {
     @PostMapping("/edit/{id}")
     public String editCategory(@PathVariable Long id, @ModelAttribute Category category) {
         category.setId(id);
-        categoryRepository.save(category);
+        categoryService.save(category);
         return "redirect:/categories";
     }
 
     @GetMapping("/delete/{id}")
     public String deleteCategory(@PathVariable Long id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid category Id:" + id));
-        categoryRepository.delete(category);
+        Category category = categoryService.findById(id);
+        if (category == null) {
+            throw new IllegalArgumentException("Invalid category Id:" + id);
+        }
+        categoryService.delete(category);
         return "redirect:/categories";
     }
 }
